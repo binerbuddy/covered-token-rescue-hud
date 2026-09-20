@@ -50,6 +50,27 @@ describe("choosing a sort that clears the pile", () => {
     assert.deepEqual(frontSort(mine), {sort: 8, blockedByElevation: false});
   });
 
+  test("raises out of a pile where nothing has ever set sort", async () => {
+    // The state every real scene is in: nothing sets sort, so the whole pile
+    // sits at 0 and a tie is not a win. This is the case that matters.
+    const mine = makeToken({id: "mine", name: "Rogue", x: 0, y: 0, sort: 0});
+    const over = makeToken({id: "over", name: "Dragon", x: 0, y: 0, sort: 0, isOwner: false});
+    env = installFoundry({tokens: [mine, over]});
+    await load();
+
+    assert.deepEqual(frontSort(mine), {sort: 1, blockedByElevation: false});
+  });
+
+  test("raises when tied against the highest of several", async () => {
+    const mine = makeToken({id: "mine", name: "Rogue", x: 0, y: 0, sort: 4});
+    const a = makeToken({id: "a", name: "Dragon", x: 0, y: 0, sort: 4, isOwner: false});
+    const b = makeToken({id: "b", name: "Kobold", x: 0, y: 0, sort: 2, isOwner: false});
+    env = installFoundry({tokens: [mine, a, b]});
+    await load();
+
+    assert.equal(frontSort(mine).sort, 5, "a tie with the top token still needs breaking");
+  });
+
   test("ignores tokens that do not overlap", async () => {
     const mine = makeToken({id: "mine", name: "Rogue", x: 0, y: 0, sort: 0});
     const far = makeToken({id: "far", name: "Archer", x: 900, y: 900, sort: 99, isOwner: false});
@@ -124,6 +145,36 @@ describe("writing the raise", () => {
 
     assert.equal(await bringToFront(theirs), false);
     assert.deepEqual(theirs.calls.update, [], "the server would reject this anyway");
+  });
+
+  test("raises a default pile through the click path", async () => {
+    const cover = makeToken({id: "cover", name: "Dragon", x: 0, y: 0, width: 200, height: 200,
+      sort: 0, isOwner: false});
+    const mine = makeToken({id: "mine", name: "Rogue", x: 50, y: 50, sort: 0});
+    env = installFoundry({tokens: [cover, mine], settings: {raiseOnSelect: true}});
+    await load();
+    invalidateConfig();
+
+    const bar = new RescueBar();
+    bar.show(cover);
+    env.hud.querySelector('button[data-token-id="mine"]')
+      .dispatchEvent(new env.window.MouseEvent("click", {bubbles: true}));
+    await settle();
+
+    assert.deepEqual(mine.calls.update, [{sort: 1}], "an all-zero pile must still raise");
+  });
+
+  test("clicking twice does not ratchet the sort upwards, from a default pile", async () => {
+    const mine = makeToken({id: "mine", name: "Rogue", x: 0, y: 0, sort: 0});
+    const over = makeToken({id: "over", name: "Dragon", x: 0, y: 0, sort: 0, isOwner: false});
+    env = installFoundry({tokens: [mine, over]});
+    await load();
+
+    await bringToFront(mine);
+    await bringToFront(mine);
+    await bringToFront(mine);
+
+    assert.deepEqual(mine.calls.update, [{sort: 1}], "one write, then it is genuinely on top");
   });
 
   test("clicking twice does not ratchet the sort upwards", async () => {

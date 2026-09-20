@@ -211,7 +211,10 @@ export function frontSort(token) {
   const rect = tokenRect(token);
   const ownSort = token.document.sort ?? 0;
   const ownElevation = token.document.elevation ?? 0;
-  let highest = ownSort;
+  // The highest sort among the tokens actually burying this one. Deliberately
+  // not seeded with the token's own sort: a tie does not mean this token wins
+  // it, so the two have to stay distinguishable.
+  let highest = null;
   for ( const other of canvas?.tokens?.placeables ?? [] ) {
     if ( (other === token) || other.isPreview || !other.visible ) continue;
     if ( intersectionArea(tokenRect(other), rect) <= 0 ) continue;
@@ -223,9 +226,13 @@ export function frontSort(token) {
     // A token standing lower down is already behind this one whatever it
     // sorts as, so it must not drag the target's sort up with it.
     if ( elevation < ownElevation ) continue;
-    highest = Math.max(highest, other.document?.sort ?? 0);
+    const sort = other.document?.sort ?? 0;
+    highest = (highest === null) ? sort : Math.max(highest, sort);
   }
-  if ( highest > ownSort ) result.sort = highest + 1;
+  // Only a strictly greater sort puts this token on top. Equal sort is the
+  // usual state of affairs, since nothing sets it by default, and Foundry
+  // settles those ties by a rule of its own that this token need not win.
+  if ( (highest !== null) && (ownSort <= highest) ) result.sort = highest + 1;
   return result;
 }
 

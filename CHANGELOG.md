@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+
+### Fixed
+
+- Bringing a token to the front did nothing on any ordinary scene. The check for "already on top" treated an equal `sort` as a win, but nothing sets `sort` by default, so every token in a pile sits at 0, every comparison tied, and no update was ever sent. Only a strictly greater `sort` puts a token in front, so a tie is now broken rather than accepted. The 2.1.0 tests all gave the covering token a distinct non-zero `sort` and so missed the one arrangement that actually occurs in play; four regression tests now cover it, each of which fails against 2.1.0.
+
 ## 2.1.0
 
 ### Added
