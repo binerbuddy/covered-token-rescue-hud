@@ -199,6 +199,7 @@ export class RescueBar {
     this.hide();
     if ( this.#frame !== null ) cancelAnimationFrame(this.#frame);
     this.#frame = null;
+    this.#marker = null;
     this.#bar = null;
     this.#root = null;
   }
@@ -472,6 +473,8 @@ export class RescueBar {
       return;
     }
     token.control({releaseOthers: !event.shiftKey});
-    hud.bind(token);
+    // bind() is async and rejects if the token is not on the viewed scene,
+    // which would otherwise surface as an unhandled rejection.
+    Promise.resolve(hud.bind(token)).catch(error => console.error(`${MODULE_ID} |`, error));
   }
 }
