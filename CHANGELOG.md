@@ -41,6 +41,14 @@ Rewritten for Foundry VTT v13 and v14. The original module targeted v10 and v11 
 - Button handlers held on to token objects that a layer redraw could replace, swallowing the first click afterwards. They now resolve by id.
 - The width cap was expressed in viewport units inside two nested scaled containers, so it did not bound the drawn width when portraits scaled with zoom. The cap is now computed for the actual on-screen size, and the row wraps instead of scrolling, since a vertical wheel over the bar zooms the canvas rather than scrolling the row.
 
+### Fixed for players who can only select their own token
+
+The bar is the only way such a player can reach their own token once the rest of the party piles onto their square, since clicking the canvas there lands on a token they have no control over. Three things got in the way.
+
+- Covered tokens were sorted by name alone, so a player's own token, the only one they can actually click, was scattered among the others. Tokens you own are now listed first.
+- Names were shown only to the owner or the GM, ignoring the token's own **Display Name** setting. A party member whose nameplate was readable on the canvas still appeared as an anonymous portrait in the bar. The display mode is now honoured.
+- Portraits for tokens you do not own looked fully clickable but did nothing on a left click. They now show a default cursor and drop the hover lift, while right click still targets them.
+
 ### Changed
 
 - Covered tokens are detected by measuring the fraction of each token that is hidden, replacing the three separate overlap rules the original used for square, hexagonal and gridless scenes. Hexagonal scenes inset the bounding boxes to approximate the hex shape.

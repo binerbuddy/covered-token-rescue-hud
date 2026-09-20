@@ -36,6 +36,10 @@ Hover any token that covers another one.
 
 An orange border means the token is selected. A red inner glow means you are targeting it.
 
+Tokens you own are listed first, so a player whose token is buried under the rest of the party does not have to read the whole row to find it. Portraits you do not own are dimmed and do not respond to a left click, because only the owner can select a token; right click still targets them.
+
+Names follow the token's own **Display Name** setting, the same rule the nameplate on the canvas follows. A token whose name is hidden from you shows an unlabelled portrait.
+
 The bar stays put while your pointer moves onto it, and follows the token if it walks away mid-hover.
 
 ## Settings
@@ -45,7 +49,7 @@ All settings are per client, so each player can tune the bar to their own screen
 | Setting | Default | What it does |
 | --- | --- | --- |
 | Enable rescue bar | On | Master switch |
-| Coverage threshold | 0.75 | How much of a token must be hidden before it counts as covered. Set it to 1.00 to require total burial |
+| Coverage threshold | 0.75 | How much of a token must be hidden before it counts as covered. Set it to 1.00 to require total burial. Note that two same-size tokens only reach 0.75 when they are nearly aligned, so on a gridless scene, or anywhere tokens land off-square, a lower value is worth trying |
 | Portrait size | 48px | On-screen size of each portrait |
 | Scale with canvas zoom | Off | On restores the old behaviour where the bar shrinks as you zoom out. Off keeps it a constant readable size |
 | Include tokens you do not own | On | Off shows only tokens you can control |
