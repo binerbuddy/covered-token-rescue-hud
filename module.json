@@ -1,16 +1,38 @@
 {
-    "id": "covered-token-rescue-hud",
-    "title": "Covered Token Rescue HUD",
-    "description": "On hovering a token with tokens under it, shows images of tokens to allow you to select them",
-    "author": "Xaukael",
-    "authors": [{"name":"Xaukael"}],
-    "version": "1.2.0",
-    "compatibility": {
-        "minimum": "10",
-        "verified": "11"
-      },
-    "scripts": ["covered-token-rescue-hud.js"],
-    "url": "https://github.com/xaukael/covered-token-rescue-hud/",
-    "manifest": "https://github.com/xaukael/covered-token-rescue-hud/raw/main/module.json",
-    "download": "https://github.com/xaukael/covered-token-rescue-hud/raw/main/covered-token-rescue-hud.zip"
+  "id": "covered-token-rescue-hud",
+  "title": "Covered Token Rescue HUD",
+  "description": "Hover a token that is sitting on top of others and a small row of portraits appears beside it, so you can still select, open or target the tokens buried underneath.",
+  "version": "2.0.0",
+  "authors": [
+    {
+      "name": "Xaukael",
+      "url": "https://github.com/xaukael",
+      "flags": {"role": "Original author"}
+    },
+    {
+      "name": "binerbuddy",
+      "url": "https://github.com/binerbuddy",
+      "flags": {"role": "Version 13 and 14 maintainer"}
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "esmodules": ["scripts/module.mjs"],
+  "styles": ["styles/covered-token-rescue-hud.css"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "url": "https://github.com/binerbuddy/covered-token-rescue-hud",
+  "readme": "https://github.com/binerbuddy/covered-token-rescue-hud/blob/main/README.md",
+  "changelog": "https://github.com/binerbuddy/covered-token-rescue-hud/blob/main/CHANGELOG.md",
+  "bugs": "https://github.com/binerbuddy/covered-token-rescue-hud/issues",
+  "license": "https://github.com/binerbuddy/covered-token-rescue-hud/blob/main/LICENSE",
+  "manifest": "https://github.com/binerbuddy/covered-token-rescue-hud/releases/latest/download/module.json",
+  "download": "https://github.com/binerbuddy/covered-token-rescue-hud/releases/latest/download/module.zip"
 }

@@ -1,0 +1,20 @@
+{
+  "CTRH.UnknownToken": "Unidentified token",
+  "CTRH.Settings.Enabled.Name": "Enable rescue bar",
+  "CTRH.Settings.Enabled.Hint": "Show the bar of covered tokens when you hover a token that is sitting on top of others.",
+  "CTRH.Settings.Threshold.Name": "Coverage threshold",
+  "CTRH.Settings.Threshold.Hint": "How much of a token must be hidden before it counts as covered. 1.00 requires it to be completely buried; lower values catch partial overlaps.",
+  "CTRH.Settings.IconSize.Name": "Portrait size (pixels)",
+  "CTRH.Settings.IconSize.Hint": "The on-screen size of each portrait in the bar.",
+  "CTRH.Settings.ScaleWithZoom.Name": "Scale with canvas zoom",
+  "CTRH.Settings.ScaleWithZoom.Hint": "When enabled the bar shrinks and grows with the canvas, matching the old behaviour. When disabled it keeps a constant size on screen, which stays readable when you zoom out.",
+  "CTRH.Settings.ShowUnowned.Name": "Include tokens you do not own",
+  "CTRH.Settings.ShowUnowned.Hint": "List every visible covered token. Turn this off to show only the tokens you can control.",
+  "CTRH.Settings.Highlight.Name": "Outline token on hover",
+  "CTRH.Settings.Highlight.Hint": "Draw a dashed outline on the canvas over the token a portrait refers to.",
+  "CTRH.Settings.Placement.Name": "Bar placement",
+  "CTRH.Settings.Placement.Hint": "Where the bar is drawn relative to the hovered token.",
+  "CTRH.Settings.Placement.Auto": "Automatic",
+  "CTRH.Settings.Placement.Below": "Below the token",
+  "CTRH.Settings.Placement.Above": "Above the token"
+}

@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting and tests
+        run: npm run check
+
+      - name: Verify the tag matches the manifest version
+        run: |
+          manifest_version=$(node -p "require('./module.json').version")
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [ "$manifest_version" != "$tag_version" ]; then
+            echo "module.json version ($manifest_version) does not match tag ($tag_version)" >&2
+            exit 1
+          fi
+
+      - name: Build the package
+        run: npm run build
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: CHANGELOG.md
+          files: |
+            dist/module.json
+            dist/module.zip
