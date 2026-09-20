@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0
+
+### Added
+
+- **Bring the token to the front when selected**, a new client setting, off by default. Selecting a token has never changed its render order, so a rescued token stayed underneath the pile and Foundry kept handing every click on that square to whatever was drawn on top. The token was selected but could not be dragged or clicked. Turning this on also raises the token by writing its `sort`, which puts it genuinely in front.
+
+  It is opt in because `sort` lives on the token document, so the new order is shared with the whole table rather than being a local view change. It only applies to tokens you own, since Foundry refuses a player's edit to someone else's token, and a token buried by something at a higher elevation cannot be raised by reordering at all. The module reports that case instead of failing silently, and it never rewrites the sort of a token that is already on top, so repeated clicks cannot ratchet the value upwards.
+
 ## 2.0.0
 
 Rewritten for Foundry VTT v13 and v14. The original module targeted v10 and v11 and no longer ran after Foundry moved its interface to Application V2.

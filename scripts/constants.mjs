@@ -14,7 +14,8 @@ export const SETTINGS = {
   SCALE_WITH_ZOOM: "scaleWithZoom",
   SHOW_UNOWNED: "showUnowned",
   PLACEMENT: "placement",
-  HIGHLIGHT: "highlightOnHover"
+  HIGHLIGHT: "highlightOnHover",
+  RAISE_ON_SELECT: "raiseOnSelect"
 };
 
 /** Where the rescue bar is drawn relative to the hovered token. @enum {string} */

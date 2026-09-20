@@ -2,7 +2,7 @@
   "id": "covered-token-rescue-hud",
   "title": "Covered Token Rescue HUD",
   "description": "Hover a token that is sitting on top of others and a small row of portraits appears beside it, so you can still select, open or target the tokens buried underneath.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "authors": [
     {
       "name": "Xaukael",

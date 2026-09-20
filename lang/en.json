@@ -1,5 +1,6 @@
 {
   "CTRH.UnknownToken": "Unidentified token",
+  "CTRH.RaiseBlockedByElevation": "That token is underneath one standing at a higher elevation, so it cannot be raised by reordering alone.",
   "CTRH.Settings.Enabled.Name": "Enable rescue bar",
   "CTRH.Settings.Enabled.Hint": "Show the bar of covered tokens when you hover a token that is sitting on top of others.",
   "CTRH.Settings.Threshold.Name": "Coverage threshold",
@@ -12,6 +13,8 @@
   "CTRH.Settings.ShowUnowned.Hint": "List every visible covered token. Turn this off to show only the tokens you can control.",
   "CTRH.Settings.Highlight.Name": "Outline token on hover",
   "CTRH.Settings.Highlight.Hint": "Draw a dashed outline on the canvas over the token a portrait refers to.",
+  "CTRH.Settings.RaiseOnSelect.Name": "Bring the token to the front when selected",
+  "CTRH.Settings.RaiseOnSelect.Hint": "Clicking a portrait also raises that token above the ones burying it, so you can drag and click it on the canvas. This changes the token for everyone at the table, and only works on tokens you own.",
   "CTRH.Settings.Placement.Name": "Bar placement",
   "CTRH.Settings.Placement.Hint": "Where the bar is drawn relative to the hovered token.",
   "CTRH.Settings.Placement.Auto": "Automatic",

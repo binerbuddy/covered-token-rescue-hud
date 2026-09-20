@@ -10,7 +10,7 @@
  */
 
 import {HIDE_DELAY_MS, MODULE_ID, PLACEMENT} from "./constants.mjs";
-import {compareNames, insetRect, isCovered} from "./geometry.mjs";
+import {compareNames, insetRect, intersectionArea, isCovered} from "./geometry.mjs";
 import {readConfig} from "./settings.mjs";
 
 /** File extensions Foundry treats as video textures. @type {ReadonlySet<string>} */
@@ -189,6 +189,74 @@ export function findCoveredTokens(anchor, config, sticky) {
   covered.sort((a, b) => ((b.isOwner ? 1 : 0) - (a.isOwner ? 1 : 0))
     || compareNames(a.document.name, b.document.name));
   return covered;
+}
+
+/**
+ * Work out what `sort` a token needs to sit above everything overlapping it,
+ * and whether a sort change can help at all.
+ *
+ * Foundry orders tokens by elevation first and `sort` second, so a token
+ * buried by something standing higher up cannot be raised by sorting alone.
+ * That is reported rather than papered over, because silently matching another
+ * token's elevation would change where it stands in the fiction.
+ *
+ * @param {Token} token  The token to raise.
+ * @returns {{sort: number|null, blockedByElevation: boolean}}
+ *          `sort` is the value to write, or null when the token is already on
+ *          top of everything it overlaps.
+ */
+export function frontSort(token) {
+  const result = {sort: null, blockedByElevation: false};
+  if ( !token?.document ) return result;
+  const rect = tokenRect(token);
+  const ownSort = token.document.sort ?? 0;
+  const ownElevation = token.document.elevation ?? 0;
+  let highest = ownSort;
+  for ( const other of canvas?.tokens?.placeables ?? [] ) {
+    if ( (other === token) || other.isPreview || !other.visible ) continue;
+    if ( intersectionArea(tokenRect(other), rect) <= 0 ) continue;
+    const elevation = other.document?.elevation ?? 0;
+    if ( elevation > ownElevation ) {
+      result.blockedByElevation = true;
+      continue;
+    }
+    // A token standing lower down is already behind this one whatever it
+    // sorts as, so it must not drag the target's sort up with it.
+    if ( elevation < ownElevation ) continue;
+    highest = Math.max(highest, other.document?.sort ?? 0);
+  }
+  if ( highest > ownSort ) result.sort = highest + 1;
+  return result;
+}
+
+/**
+ * Raise a token above the ones burying it.
+ *
+ * `sort` lives on the token document, so this is a real update that every
+ * client sees and that only the token's owner may make. It is deliberately
+ * skipped when the token is already on top, so that clicking a portrait
+ * repeatedly does not ratchet the value upwards forever.
+ *
+ * @param {Token} token          The token to raise.
+ * @returns {Promise<boolean>}   True when an update was actually sent.
+ */
+export async function bringToFront(token) {
+  if ( !token?.document || !token.isOwner ) return false;
+  const {sort, blockedByElevation} = frontSort(token);
+  if ( blockedByElevation ) {
+    const message = globalThis.game?.i18n?.localize("CTRH.RaiseBlockedByElevation");
+    if ( message ) globalThis.ui?.notifications?.info?.(message);
+  }
+  if ( sort === null ) return false;
+  try {
+    await token.document.update({sort});
+    return true;
+  } catch ( error ) {
+    // The server rejects the update if ownership changed between the click
+    // and the request, which must not take the rest of the click with it.
+    console.error(`${MODULE_ID} |`, error);
+    return false;
+  }
 }
 
 /**
@@ -686,6 +754,12 @@ export class RescueBar {
     if ( !token.isOwner ) return;
     token.control({releaseOthers: !event.shiftKey});
     this.refreshStates();
+    // Selecting a token does not move it up the pile, so every pointer event
+    // over that square still goes to whatever is drawn on top of it. Without
+    // this the token is selected but still cannot be dragged or clicked.
+    if ( readConfig().raiseOnSelect ) {
+      bringToFront(token).catch(error => console.error(`${MODULE_ID} |`, error));
+    }
   }
 
   /**
@@ -712,6 +786,9 @@ export class RescueBar {
     // bind() is async and rejects if the token is not on the viewed scene,
     // which would otherwise surface as an unhandled rejection.
     token.control({releaseOthers: !event.shiftKey});
+    if ( readConfig().raiseOnSelect ) {
+      bringToFront(token).catch(error => console.error(`${MODULE_ID} |`, error));
+    }
     Promise.resolve(hud.bind(token)).catch(error => console.error(`${MODULE_ID} |`, error));
   }
 }

@@ -15,6 +15,8 @@ export default [
         foundry: "readonly",
         Hooks: "readonly",
         CONFIG: "readonly",
+        CONST: "readonly",
+        ui: "readonly",
         PIXI: "readonly",
         Token: "readonly"
       }

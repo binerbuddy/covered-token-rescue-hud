@@ -25,12 +25,16 @@ import {JSDOM} from "jsdom";
  * @param {boolean} [options.isTargeted] Whether it is targeted.
  * @param {number} [options.displayName] A CONST.TOKEN_DISPLAY_MODES value.
  *                                       Foundry's own default is NONE.
+ * @param {number} [options.sort]        Render order among equal elevations.
+ * @param {number} [options.elevation]   Height above the ground.
+ * @param {boolean} [options.updateFails] Make document.update() reject, as the
+ *                                       server does when ownership is refused.
  * @returns {object}                     The fake token.
  */
 export function makeToken({
   id, name, x, y, width = 100, height = 100, src = "tokens/goblin.webp",
   isOwner = true, visible = true, controlled = false, isTargeted = false,
-  displayName = 0
+  displayName = 0, sort = 0, elevation = 0, updateFails = false
 }) {
   const token = {
     id,
@@ -41,8 +45,16 @@ export function makeToken({
     controlled,
     isTargeted,
     isOwner,
-    calls: {control: [], setTarget: []},
-    document: {name, texture: {src}, ring: {enabled: false}, displayName},
+    calls: {control: [], setTarget: [], update: []},
+    document: {
+      name, texture: {src}, ring: {enabled: false}, displayName, sort, elevation,
+      async update(changes) {
+        token.calls.update.push(changes);
+        if ( updateFails ) throw new Error("User lacks permission to update Token");
+        Object.assign(token.document, changes);
+        return token.document;
+      }
+    },
     control(options) {
       token.calls.control.push(options);
       token.controlled = true;
@@ -67,7 +79,8 @@ export function makeToken({
  * @param {object} [options.settings]    Overrides for module settings.
  * @param {number} [options.zoom=1]      Canvas zoom level.
  * @param {boolean} [options.hexagonal]  Whether the grid is hexagonal.
- * @returns {{cleanup: () => void, hud: HTMLElement, hudCalls: object}}
+ * @returns {{cleanup: () => void, hud: HTMLElement, hudCalls: object,
+ *            uiCalls: object}}
  */
 export function installFoundry({tokens, settings = {}, zoom = 1, hexagonal = false}) {
   const dom = new JSDOM('<!doctype html><html><body><div id="hud"></div></body></html>');
@@ -81,11 +94,13 @@ export function installFoundry({tokens, settings = {}, zoom = 1, hexagonal = fal
     scaleWithZoom: false,
     showUnowned: true,
     highlightOnHover: true,
+    raiseOnSelect: false,
     placement: "auto",
     ...settings
   };
 
   const hudCalls = {bind: [], clear: 0, rendered: false};
+  const uiCalls = {info: [], warn: [], error: []};
   const scene = {isView: true};
   for ( const token of tokens ) token.scene = scene;
 
@@ -122,6 +137,13 @@ export function installFoundry({tokens, settings = {}, zoom = 1, hexagonal = fal
         }
       }
     },
+    ui: {
+      notifications: {
+        info: message => uiCalls.info.push(message),
+        warn: message => uiCalls.warn.push(message),
+        error: message => uiCalls.error.push(message)
+      }
+    },
     CONST: {
       TOKEN_DISPLAY_MODES: {NONE: 0, CONTROL: 10, OWNER_HOVER: 20, HOVER: 30, OWNER: 40, ALWAYS: 50}
     },
@@ -145,6 +167,7 @@ export function installFoundry({tokens, settings = {}, zoom = 1, hexagonal = fal
   return {
     hud,
     hudCalls,
+    uiCalls,
     settings: values,
     window,
     cleanup() {

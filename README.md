@@ -42,6 +42,14 @@ Names follow the token's own **Display Name** setting, the same rule the namepla
 
 The bar stays put while your pointer moves onto it, and follows the token if it walks away mid-hover.
 
+### Selecting a token is not the same as reaching it
+
+Clicking a portrait selects the token, but it does not move it up the pile. Foundry hands every click on that square to whichever token is drawn on top, so a selected token underneath one of the others still cannot be dragged. You can still move it with the arrow keys, and right clicking its portrait opens its HUD.
+
+Turn on **Bring the token to the front when selected** to fix the underlying problem. It raises the token by writing its `sort` value, which is a change to the token itself: everyone at the table sees the new order, and it stays that way until something changes it back. That is why it is off by default.
+
+Two limits are worth knowing. It only works on tokens you own, because Foundry does not let a player edit a token belonging to someone else. And a token buried by something at a higher elevation cannot be raised by reordering at all, since elevation wins; the module says so rather than quietly doing nothing.
+
 ## Settings
 
 All settings are per client, so each player can tune the bar to their own screen without affecting the table.
@@ -54,6 +62,7 @@ All settings are per client, so each player can tune the bar to their own screen
 | Scale with canvas zoom | Off | On restores the old behaviour where the bar shrinks as you zoom out. Off keeps it a constant readable size |
 | Include tokens you do not own | On | Off shows only tokens you can control |
 | Outline token on hover | On | Draws a dashed outline on the canvas over the token a portrait refers to |
+| Bring the token to the front when selected | Off | Clicking a portrait also raises that token above the ones burying it, so you can drag and click it on the canvas. See the note below before turning this on |
 | Bar placement | Automatic | Draw the bar below the token, above it, or flip automatically near the bottom edge of the scene |
 
 ## What changed in version 2

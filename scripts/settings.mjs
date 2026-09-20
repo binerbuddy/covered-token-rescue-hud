@@ -70,6 +70,13 @@ export function registerSettings(onChange) {
     default: true
   });
 
+  register(SETTINGS.RAISE_ON_SELECT, {
+    name: "CTRH.Settings.RaiseOnSelect.Name",
+    hint: "CTRH.Settings.RaiseOnSelect.Hint",
+    type: Boolean,
+    default: false
+  });
+
   register(SETTINGS.PLACEMENT, {
     name: "CTRH.Settings.Placement.Name",
     hint: "CTRH.Settings.Placement.Hint",
@@ -123,7 +130,8 @@ export function invalidateConfig() {
  *
  * @returns {{enabled: boolean, threshold: number, iconSize: number,
  *            scaleWithZoom: boolean, showUnowned: boolean,
- *            highlight: boolean, placement: string}}
+ *            highlight: boolean, raiseOnSelect: boolean,
+ *            placement: string}}
  */
 export function readConfig() {
   if ( cachedConfig ) return cachedConfig;
@@ -134,6 +142,7 @@ export function readConfig() {
     scaleWithZoom: getSetting(SETTINGS.SCALE_WITH_ZOOM, false),
     showUnowned: getSetting(SETTINGS.SHOW_UNOWNED, true),
     highlight: getSetting(SETTINGS.HIGHLIGHT, true),
+    raiseOnSelect: getSetting(SETTINGS.RAISE_ON_SELECT, false),
     placement: getSetting(SETTINGS.PLACEMENT, PLACEMENT.AUTO)
   };
   // Only cache once the settings system can actually answer. Caching a
