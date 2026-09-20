@@ -71,6 +71,41 @@ export function portraitSource(token) {
 }
 
 /**
+ * Whether this user is allowed to read a token's name.
+ *
+ * Owners and the GM always are. Past that the token's own display mode
+ * decides, the same rule the canvas nameplate follows, so a party member
+ * whose name is readable on the canvas is named in the bar too rather than
+ * reduced to an anonymous portrait.
+ *
+ * `HOVER` counts as visible because the bar only exists while the user is
+ * hovering the pile that this token is buried in.
+ *
+ * @param {Token} token  The token to name.
+ * @returns {boolean}    True when the name may be shown.
+ */
+export function isNameVisible(token) {
+  if ( !token?.document ) return false;
+  if ( token.isOwner || globalThis.game?.user?.isGM ) return true;
+  // `CONST` is a Foundry global, absent outside a running client.
+  const modes = globalThis.CONST?.TOKEN_DISPLAY_MODES;
+  if ( !modes ) return false;
+  const mode = token.document.displayName;
+  return (mode === modes.ALWAYS) || (mode === modes.HOVER);
+}
+
+/**
+ * The name to draw for a token, or an empty string when this user may not see
+ * it.
+ *
+ * @param {Token} token  The token to name.
+ * @returns {string}     The display name, or "".
+ */
+export function visibleName(token) {
+  return isNameVisible(token) ? (token.document?.name ?? "") : "";
+}
+
+/**
  * Convert a token's live bounds into a plain rectangle, applying the hex inset
  * when the scene uses a hexagonal grid.
  *
@@ -99,7 +134,7 @@ function tokenSignature(token) {
   return [
     token.id,
     portraitSource(token),
-    token.document?.name ?? "",
+    visibleName(token),
     token.isOwner ? "1" : "0",
     token.visible ? "1" : "0"
   ].join("\u0000");
@@ -133,7 +168,7 @@ function toScreen(x, y) {
  *                               their coverage falls a little below the
  *                               threshold, which stops a token on the boundary
  *                               from flickering in and out during movement.
- * @returns {Token[]}            Covered tokens, sorted by display name.
+ * @returns {Token[]}            Covered tokens, owned ones first, then by name.
  */
 export function findCoveredTokens(anchor, config, sticky) {
   if ( !anchor || !canvas?.ready ) return [];
@@ -148,7 +183,11 @@ export function findCoveredTokens(anchor, config, sticky) {
     const threshold = sticky?.has(token.id) ? held : config.threshold;
     if ( isCovered(tokenRect(token), coverRect, threshold) ) covered.push(token);
   }
-  covered.sort((a, b) => compareNames(a.document.name, b.document.name));
+  // Owned tokens lead. They are the only ones a left click can select, so a
+  // player digging their own token out of a six-token pile should not have to
+  // read every portrait to find the one that answers.
+  covered.sort((a, b) => ((b.isOwner ? 1 : 0) - (a.isOwner ? 1 : 0))
+    || compareNames(a.document.name, b.document.name));
   return covered;
 }
 
@@ -491,7 +530,7 @@ export class RescueBar {
     button.classList.toggle("targeted", token.isTargeted);
     button.classList.toggle("unowned", !token.isOwner);
 
-    const name = token.isOwner || game.user.isGM ? token.document.name : "";
+    const name = visibleName(token);
     if ( name ) {
       button.dataset.tooltipText = name;
       button.setAttribute("aria-label", name);

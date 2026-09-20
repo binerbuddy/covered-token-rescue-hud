@@ -23,11 +23,14 @@ import {JSDOM} from "jsdom";
  * @param {boolean} [options.visible]    Whether it is rendered.
  * @param {boolean} [options.controlled] Whether it is selected.
  * @param {boolean} [options.isTargeted] Whether it is targeted.
+ * @param {number} [options.displayName] A CONST.TOKEN_DISPLAY_MODES value.
+ *                                       Foundry's own default is NONE.
  * @returns {object}                     The fake token.
  */
 export function makeToken({
   id, name, x, y, width = 100, height = 100, src = "tokens/goblin.webp",
-  isOwner = true, visible = true, controlled = false, isTargeted = false
+  isOwner = true, visible = true, controlled = false, isTargeted = false,
+  displayName = 0
 }) {
   const token = {
     id,
@@ -39,7 +42,7 @@ export function makeToken({
     isTargeted,
     isOwner,
     calls: {control: [], setTarget: []},
-    document: {name, texture: {src}, ring: {enabled: false}},
+    document: {name, texture: {src}, ring: {enabled: false}, displayName},
     control(options) {
       token.calls.control.push(options);
       token.controlled = true;
@@ -118,6 +121,9 @@ export function installFoundry({tokens, settings = {}, zoom = 1, hexagonal = fal
           }
         }
       }
+    },
+    CONST: {
+      TOKEN_DISPLAY_MODES: {NONE: 0, CONTROL: 10, OWNER_HOVER: 20, HOVER: 30, OWNER: 40, ALWAYS: 50}
     },
     game: {
       user: {isGM: false},
