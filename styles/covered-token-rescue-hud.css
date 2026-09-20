@@ -95,8 +95,17 @@
   box-shadow: inset 0 0 0 2px var(--ctrh-target);
 }
 
+/* A token you do not own cannot be selected, so the portrait must not promise
+   a click. It stays operable by right click for targeting, which is why it
+   keeps a hover border rather than reading as fully inert. */
 .ctrh-token.unowned {
+  cursor: default;
   opacity: 0.85;
+}
+
+.ctrh-token.unowned:hover {
+  border-color: rgb(255 255 255 / 45%);
+  transform: none;
 }
 
 .ctrh-portrait {
@@ -117,25 +126,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Bridge the gap between the token and the bar so the pointer never passes
-   through dead space on its way to a portrait. Crossing a non-interactive gap
-   lets the canvas hand the hover to whatever token sits underneath, which
-   dismisses the bar just as the user reaches for it. */
-.ctrh-bar::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(-1 * var(--ctrh-gap, 6px));
-  height: var(--ctrh-gap, 6px);
-}
-
-.ctrh-bar.above::before {
-  top: auto;
-  bottom: calc(-1 * var(--ctrh-gap, 6px));
-}
-
-.ctrh-token {
+  .ctrh-token {
     transition: none;
   }
 
