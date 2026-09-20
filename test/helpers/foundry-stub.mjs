@@ -50,7 +50,9 @@ export function makeToken({
       token.isTargeted = state;
     }
   };
-  token.scene = {isView: true};
+  // installFoundry() re-points this at the shared scene object, matching real
+  // Foundry where a placeable's scene IS canvas.scene.
+  token.scene = null;
   return token;
 }
 
@@ -81,6 +83,9 @@ export function installFoundry({tokens, settings = {}, zoom = 1, hexagonal = fal
   };
 
   const hudCalls = {bind: [], clear: 0, rendered: false};
+  const scene = {isView: true};
+  for ( const token of tokens ) token.scene = scene;
+
   const previous = {};
   const globals = {
     window,
@@ -90,13 +95,15 @@ export function installFoundry({tokens, settings = {}, zoom = 1, hexagonal = fal
     cancelAnimationFrame: id => window.clearTimeout(id),
     canvas: {
       ready: true,
-      scene: {isView: true},
+      scene,
       dimensions: {width: 4000, height: 3000},
-      stage: {scale: {x: zoom, y: zoom}},
+      stage: {scale: {x: zoom, y: zoom}, position: {x: 0, y: 0}},
       grid: {size: 100, isHexagonal: hexagonal, isSquare: !hexagonal, isGridless: false},
+      hover: null,
       hud: {element: hud},
       tokens: {
         placeables: tokens,
+        hover: null,
         get: id => tokens.find(t => t.id === id) ?? null,
         hud: {
           get rendered() {

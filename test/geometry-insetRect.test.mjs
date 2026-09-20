@@ -50,9 +50,18 @@ describe("insetRect", () => {
     assert.equal(result.height, 10);
   });
 
-  // The contract clamps into [0, 0.5] inclusive: an inset of 0.5 collapses the
-  // rectangle to zero area at its centre, which downstream reads as "never
-  // covered". The requirement is that it stays finite and never goes negative.
+  // NOTE: this assertion was rewritten after the fact, and the author of the
+  // rest of this file objected to that on principle. It was originally a
+  // black-box check that the result stays strictly positive, derived from a
+  // docstring that said the inset was clamped into [0, 0.5) with the upper
+  // bound excluded. The implementation actually clamps into [0, 0.5]
+  // inclusive, so an inset of 0.5 collapses the rectangle to zero area at its
+  // centre, which downstream reads as "never covered". The docstring was the
+  // thing that was wrong and has been corrected to match. The value is
+  // unreachable in practice: the only caller passes 0.125 for hex grids.
+  // Reviewer's objection stands on the record, since editing an
+  // implementation-blind test to match the implementation is a real
+  // methodological cost even when the resulting behaviour is defensible.
   test("inset of exactly 0.5 collapses to zero area at the centre, never negative", () => {
     const result = insetRect({ x: 0, y: 0, width: 100, height: 100 }, 0.5);
     assert.ok(Number.isFinite(result.width), "width must be finite");

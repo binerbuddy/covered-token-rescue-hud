@@ -127,7 +127,7 @@ export function invalidateConfig() {
  */
 export function readConfig() {
   if ( cachedConfig ) return cachedConfig;
-  cachedConfig = {
+  const snapshot = {
     enabled: getSetting(SETTINGS.ENABLED, true),
     threshold: getSetting(SETTINGS.THRESHOLD, 0.75),
     iconSize: getSetting(SETTINGS.ICON_SIZE, 48),
@@ -136,5 +136,10 @@ export function readConfig() {
     highlight: getSetting(SETTINGS.HIGHLIGHT, true),
     placement: getSetting(SETTINGS.PLACEMENT, PLACEMENT.AUTO)
   };
+  // Only cache once the settings system can actually answer. Caching a
+  // snapshot built entirely from fallbacks would pin the defaults for the rest
+  // of the session with nothing to invalidate it.
+  if ( !game?.settings?.get ) return snapshot;
+  cachedConfig = snapshot;
   return cachedConfig;
 }

@@ -38,14 +38,21 @@ Hooks.on("hoverToken", (token, hovered) => {
 // Token movement is animated, so the document update fires once at the start
 // while the visual position keeps changing. Tracking the refresh flags keeps
 // the bar pinned to the token for the whole animation.
+//
+// Visibility is included because a token revealed underneath the hovered one
+// becomes rescuable at that moment, and nothing else would tell us.
+// refreshSoon() is cheap when no token is hovered, so it needs no guard here.
 Hooks.on("refreshToken", (token, flags) => {
-  if ( !bar.anchor ) return;
-  if ( !flags?.refreshPosition && !flags?.refreshSize ) return;
+  if ( !flags?.refreshPosition && !flags?.refreshSize && !flags?.refreshVisibility ) return;
   if ( token === bar.anchor ) bar.reposition();
   bar.refreshSoon();
 });
 
-Hooks.on("controlToken", () => bar.refreshStates());
+Hooks.on("controlToken", () => {
+  bar.refreshStates();
+  // Controlling a token forces it visible, which can change what is rescuable.
+  bar.refreshSoon();
+});
 Hooks.on("targetToken", () => bar.refreshStates());
 
 Hooks.on("createToken", () => bar.refreshSoon());

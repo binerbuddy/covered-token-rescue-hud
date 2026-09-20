@@ -15,19 +15,23 @@
 .ctrh-bar {
   --ctrh-icon-size: 48px;
   --ctrh-scale: 1;
+  --ctrh-max-width: none;
   --ctrh-accent: #ff9829;
   --ctrh-target: #d01f1f;
 
   position: absolute;
   display: flex;
-  flex-wrap: nowrap;
+  /* Wrap rather than scroll. A vertical wheel over the bar bubbles to the
+     canvas and zooms the scene, so an overflowing row would be effectively
+     unscrollable with a plain mouse. The cap is set from script because the
+     on-screen width depends on both this element's scale and the canvas zoom. */
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: 4px;
-  padding: 4px;
+  padding: 6px;
   width: max-content;
-  max-width: 60vw;
-  overflow-x: auto;
-  overflow-y: hidden;
+  max-width: var(--ctrh-max-width);
   pointer-events: auto;
   border: 1px solid rgb(0 0 0 / 60%);
   border-radius: 6px;
