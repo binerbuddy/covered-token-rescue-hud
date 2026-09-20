@@ -31,7 +31,14 @@ Hooks.once("init", () => {
 
 Hooks.on("hoverToken", (token, hovered) => {
   if ( coreHudOpen() ) return;
-  if ( hovered ) bar.show(token);
+  if ( hovered ) {
+    // The bar is drawn over the canvas, and the canvas keeps hit testing
+    // underneath it. Reaching for a portrait that happens to sit over another
+    // token therefore reports that token as hovered, which would otherwise
+    // re-anchor the bar to it and dismiss the very thing being reached for.
+    if ( (token !== bar.anchor) && bar.containsPointer ) return;
+    bar.show(token);
+  }
   else if ( bar.anchor === token ) bar.scheduleHide();
 });
 

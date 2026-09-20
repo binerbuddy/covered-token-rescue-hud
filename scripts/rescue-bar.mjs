@@ -31,6 +31,17 @@ const HYSTERESIS = 0.05;
 const MAX_WIDTH_FRACTION = 0.6;
 
 /**
+ * Screen pixels of slack around the bar that still count as "the pointer is on
+ * it". Comfortably larger than {@link GAP_PX} so the gap between the token and
+ * the bar is never treated as leaving.
+ * @type {number}
+ */
+const POINTER_SLACK = 14;
+
+/** Gap between the anchor token and the bar, in the bar's own pixels. @type {number} */
+const GAP_PX = 6;
+
+/**
  * Determine whether a texture path points at a video rather than an image.
  *
  * @param {string} src  The texture path, which may carry a query string.
@@ -177,6 +188,12 @@ export class RescueBar {
   /** True while the pointer rests on the bar itself. @type {boolean} */
   #pointerInside = false;
 
+  /** Last seen pointer position in client coordinates. @type {{x: number, y: number}|null} */
+  #pointer = null;
+
+  /** Bound document pointer listener, kept so it can be removed. @type {Function|null} */
+  #onPointerMove = null;
+
   /** Pending animation frame handle for a coalesced rebuild. @type {number|null} */
   #frame = null;
 
@@ -188,6 +205,42 @@ export class RescueBar {
   /** Whether the bar is currently on screen. @type {boolean} */
   get visible() {
     return !!this.#root?.isConnected && (this.#shown.size > 0);
+  }
+
+  /**
+   * Whether the pointer is over the bar right now.
+   *
+   * This is answered geometrically rather than from pointerenter alone. The
+   * bar is drawn in the canvas HUD layer, and the canvas keeps hit testing
+   * underneath it, so a token sitting behind the bar still reports itself as
+   * hovered. Without this the bar would dismiss itself the moment the user
+   * reached for it over another token.
+   *
+   * The test is padded by {@link POINTER_SLACK} so that the few pixels of gap
+   * between the token and the bar do not read as "the pointer has left". That
+   * gap is a dead zone: crossing it, the canvas reports whatever token lies
+   * beneath as newly hovered, which would re-anchor the bar and dismiss the
+   * very thing the user is reaching for.
+   *
+   * @type {boolean}
+   */
+  get containsPointer() {
+    if ( !this.#bar?.isConnected ) return false;
+    if ( this.#pointerInside ) return true;
+    // The browser's own hit test, which is authoritative and already updated
+    // by the time any hook runs. Foundry re-tests the canvas at the last
+    // pointer position whenever the scene changes, so a tracked position can
+    // still be a frame behind; this cannot be.
+    try {
+      if ( this.#bar.matches(":hover") ) return true;
+    } catch {
+      // :hover is unsupported in some test environments; fall through.
+    }
+    if ( !this.#pointer ) return false;
+    const r = this.#bar.getBoundingClientRect();
+    const pad = POINTER_SLACK;
+    return (this.#pointer.x >= r.left - pad) && (this.#pointer.x <= r.right + pad)
+      && (this.#pointer.y >= r.top - pad) && (this.#pointer.y <= r.bottom + pad);
   }
 
   /* -------------------------------------------- */
@@ -231,6 +284,12 @@ export class RescueBar {
         this.#clearMarker();
         this.scheduleHide();
       });
+    }
+    if ( !this.#onPointerMove ) {
+      this.#onPointerMove = event => {
+        this.#pointer = {x: event.clientX, y: event.clientY};
+      };
+      document.addEventListener("pointermove", this.#onPointerMove, {capture: true, passive: true});
     }
     if ( this.#bar.parentElement !== this.#root ) this.#root.appendChild(this.#bar);
     if ( this.#root.parentElement !== hud ) hud.appendChild(this.#root);
@@ -294,6 +353,9 @@ export class RescueBar {
     this.hide();
     if ( this.#frame !== null ) cancelAnimationFrame(this.#frame);
     this.#frame = null;
+    if ( this.#onPointerMove ) document.removeEventListener("pointermove", this.#onPointerMove, {capture: true});
+    this.#onPointerMove = null;
+    this.#pointer = null;
     this.#marker = null;
     this.#bar = null;
     this.#root = null;
@@ -311,7 +373,7 @@ export class RescueBar {
       this.#hideTimer = null;
       // Re-arm rather than give up. Dropping the timer here would leave a
       // pointerleave on the bar as the only remaining way to dismiss it.
-      if ( this.#pointerInside ) this.scheduleHide();
+      if ( this.containsPointer ) this.scheduleHide();
       else this.hide();
     }, HIDE_DELAY_MS);
   }
@@ -486,7 +548,7 @@ export class RescueBar {
     const bounds = this.#anchor.bounds;
     const zoom = canvas?.stage?.scale?.x || 1;
     const scale = config.scaleWithZoom ? 1 : (1 / zoom);
-    const gap = 6 * scale;
+    const gap = GAP_PX * scale;
     const estimatedHeight = (config.iconSize + 12) * scale;
 
     let above = config.placement === PLACEMENT.ABOVE;
@@ -512,6 +574,8 @@ export class RescueBar {
     style.setProperty("--ctrh-icon-size", `${config.iconSize}px`);
     style.setProperty("--ctrh-scale", String(scale));
     style.setProperty("--ctrh-max-width", maxWidth);
+    style.setProperty("--ctrh-gap", `${GAP_PX}px`);
+    this.#bar.classList.toggle("above", above);
     style.left = `${bounds.x + (bounds.width / 2)}px`;
     if ( above ) {
       style.top = `${bounds.y - gap}px`;

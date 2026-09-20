@@ -288,3 +288,70 @@ describe("resource handling", () => {
     assert.equal(buried.calls.control.length, 0, "not the stale one");
   });
 });
+
+describe("reaching for the bar when it overlaps another token", () => {
+  /**
+   * Give the bar a real rectangle. jsdom reports zeros for every element, which
+   * would make any geometric hit test meaningless.
+   *
+   * @param {HTMLElement} el   The element to fix in place.
+   * @param {object} rect      The rectangle it should report.
+   */
+  function pinRect(el, rect) {
+    el.getBoundingClientRect = () => ({...rect, toJSON: () => rect});
+  }
+
+  test("the pointer counts as on the bar while crossing the gap below the token", async () => {
+    const cover = makeToken({id: "cover", name: "Dragon", x: 0, y: 0, width: 200, height: 200});
+    const buried = makeToken({id: "buried", name: "Paladin", x: 50, y: 50, width: 100, height: 100});
+    env = installFoundry({tokens: [cover, buried]});
+    await load();
+
+    const bar = new RescueBar();
+    bar.show(cover);
+    const element = env.hud.querySelector(".ctrh-bar");
+    pinRect(element, {x: 100, y: 200, width: 120, height: 60, left: 100, top: 200, right: 220, bottom: 260});
+
+    const move = (x, y) => {
+      const ev = new env.window.MouseEvent("pointermove", {clientX: x, clientY: y, bubbles: true});
+      env.window.document.dispatchEvent(ev);
+    };
+
+    // Squarely inside.
+    move(160, 230);
+    assert.equal(bar.containsPointer, true);
+
+    // In the few pixels of gap between the token above and the bar. This is the
+    // case that used to read as "pointer has left" and dismissed the bar.
+    move(160, 194);
+    assert.equal(bar.containsPointer, true, "the gap must not count as leaving");
+
+    // Genuinely well away from it.
+    move(160, 120);
+    assert.equal(bar.containsPointer, false);
+  });
+
+  test("a token under the bar does not steal the anchor while the pointer is on it", async () => {
+    const cover = makeToken({id: "cover", name: "Dragon", x: 0, y: 0, width: 200, height: 200});
+    const buried = makeToken({id: "buried", name: "Paladin", x: 50, y: 50, width: 100, height: 100});
+    // Sits in the square below, exactly where the bar is drawn.
+    const neighbour = makeToken({id: "south", name: "South", x: 0, y: 200, width: 200, height: 200});
+    env = installFoundry({tokens: [cover, buried, neighbour]});
+    await load();
+
+    const bar = new RescueBar();
+    bar.show(cover);
+    const element = env.hud.querySelector(".ctrh-bar");
+    pinRect(element, {x: 100, y: 200, width: 120, height: 60, left: 100, top: 200, right: 220, bottom: 260});
+    env.window.document.dispatchEvent(
+      new env.window.MouseEvent("pointermove", {clientX: 160, clientY: 230, bubbles: true}));
+
+    assert.equal(bar.containsPointer, true);
+
+    // This is what the entry point checks before re-anchoring.
+    const wouldReanchor = (neighbour !== bar.anchor) && !bar.containsPointer;
+    assert.equal(wouldReanchor, false, "hovering the token beneath must not re-anchor the bar");
+    assert.equal(bar.anchor, cover);
+    assert.equal(bar.visible, true);
+  });
+});

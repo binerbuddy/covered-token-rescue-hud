@@ -16,6 +16,7 @@
   --ctrh-icon-size: 48px;
   --ctrh-scale: 1;
   --ctrh-max-width: none;
+  --ctrh-gap: 6px;
   --ctrh-accent: #ff9829;
   --ctrh-target: #d01f1f;
 
@@ -33,12 +34,32 @@
   width: max-content;
   max-width: var(--ctrh-max-width);
   pointer-events: auto;
-  border: 1px solid rgb(0 0 0 / 60%);
+  /* The bar frequently lands on top of another token, so the backdrop has to
+     be opaque enough to read against bright artwork, not just empty canvas. */
+  border: 1px solid rgb(255 255 255 / 25%);
   border-radius: 6px;
-  background: rgb(0 0 0 / 55%);
-  backdrop-filter: blur(3px);
-  box-shadow: 0 2px 6px rgb(0 0 0 / 50%);
+  background: rgb(12 12 14 / 88%);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 75%), 0 0 0 1px rgb(0 0 0 / 60%);
   scrollbar-width: thin;
+}
+
+/* Bridge the gap between the token and the bar so the pointer never passes
+   through dead space on its way to a portrait. Crossing a non-interactive gap
+   lets the canvas hand the hover to whatever token sits underneath, which
+   dismisses the bar just as the user reaches for it. */
+.ctrh-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(-1 * var(--ctrh-gap, 6px));
+  height: var(--ctrh-gap, 6px);
+}
+
+.ctrh-bar.above::before {
+  top: auto;
+  bottom: calc(-1 * var(--ctrh-gap, 6px));
 }
 
 .ctrh-token {
@@ -52,7 +73,7 @@
   cursor: pointer;
   border: 2px solid transparent;
   border-radius: 4px;
-  background: rgb(255 255 255 / 8%);
+  background: rgb(255 255 255 / 10%);
   transition: border-color 120ms ease, transform 120ms ease;
 }
 
@@ -96,7 +117,25 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ctrh-token {
+  /* Bridge the gap between the token and the bar so the pointer never passes
+   through dead space on its way to a portrait. Crossing a non-interactive gap
+   lets the canvas hand the hover to whatever token sits underneath, which
+   dismisses the bar just as the user reaches for it. */
+.ctrh-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(-1 * var(--ctrh-gap, 6px));
+  height: var(--ctrh-gap, 6px);
+}
+
+.ctrh-bar.above::before {
+  top: auto;
+  bottom: calc(-1 * var(--ctrh-gap, 6px));
+}
+
+.ctrh-token {
     transition: none;
   }
 

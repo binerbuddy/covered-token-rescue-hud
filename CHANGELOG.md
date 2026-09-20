@@ -23,6 +23,11 @@ Rewritten for Foundry VTT v13 and v14. The original module targeted v10 and v11 
 - Names now sort with a locale and numeric aware comparison, so "Goblin 2" comes before "Goblin 10".
 - The canvas outline drawn when pointing at a portrait is cleaned up reliably rather than leaking when the bar closes underneath the pointer.
 
+### Fixed after live testing on Foundry 14.364
+
+- The bar was unusable whenever it happened to be drawn over another token, which is common, since it renders in the square below the one you are hovering. A few pixels of gap separate the token from the bar, and crossing that gap let the canvas hand the hover to the token underneath, which re-anchored the bar and dismissed it before the pointer arrived. The click then fell through to the wrong token. The gap is now bridged so the pointer never crosses dead space, and a hover arriving while the pointer is on the bar no longer re-anchors it.
+- Raised the contrast of the bar's backdrop. It was tuned against empty canvas and read poorly over bright token artwork, which is exactly where it usually lands.
+
 ### Fixed after code review
 
 - A hovered token that covered nothing stopped being tracked, so a token moving underneath it afterwards never produced a bar. A single frame of below-threshold coverage during a movement animation also dismissed a bar that was already in use, permanently, until the pointer left the token and came back. The hovered token is now tracked independently of whether anything is drawn.
