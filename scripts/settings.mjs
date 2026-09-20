@@ -74,7 +74,7 @@ export function registerSettings(onChange) {
     name: "CTRH.Settings.RaiseOnSelect.Name",
     hint: "CTRH.Settings.RaiseOnSelect.Hint",
     type: Boolean,
-    default: false
+    default: true
   });
 
   register(SETTINGS.PLACEMENT, {
@@ -142,7 +142,7 @@ export function readConfig() {
     scaleWithZoom: getSetting(SETTINGS.SCALE_WITH_ZOOM, false),
     showUnowned: getSetting(SETTINGS.SHOW_UNOWNED, true),
     highlight: getSetting(SETTINGS.HIGHLIGHT, true),
-    raiseOnSelect: getSetting(SETTINGS.RAISE_ON_SELECT, false),
+    raiseOnSelect: getSetting(SETTINGS.RAISE_ON_SELECT, true),
     placement: getSetting(SETTINGS.PLACEMENT, PLACEMENT.AUTO)
   };
   // Only cache once the settings system can actually answer. Caching a

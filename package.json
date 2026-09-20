@@ -1,6 +1,6 @@
 {
   "name": "covered-token-rescue-hud",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Foundry VTT module that surfaces tokens buried underneath other tokens.",
   "type": "module",
   "private": true,

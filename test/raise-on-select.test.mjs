@@ -237,7 +237,7 @@ describe("the setting gates the whole thing", () => {
     assert.deepEqual(mine.calls.update, [{sort: 6}], "and now it also raises");
   });
 
-  test("clicking changes nothing on the document by default", async () => {
+  test("clicking raises without anyone having to switch it on", async () => {
     const cover = makeToken({id: "cover", name: "Dragon", x: 0, y: 0, width: 200, height: 200,
       sort: 5, isOwner: false});
     const mine = makeToken({id: "mine", name: "Rogue", x: 50, y: 50, sort: 0});
@@ -245,7 +245,8 @@ describe("the setting gates the whole thing", () => {
     await load();
     invalidateConfig();
 
-    assert.equal(env.settings.raiseOnSelect, false, "opt in, because it is a shared write");
+    assert.equal(env.settings.raiseOnSelect, true,
+      "selecting a token you then cannot reach is the surprising behaviour");
 
     const bar = new RescueBar();
     bar.show(cover);
@@ -254,7 +255,25 @@ describe("the setting gates the whole thing", () => {
     await settle();
 
     assert.deepEqual(mine.calls.control, [{releaseOthers: true}]);
-    assert.deepEqual(mine.calls.update, []);
+    assert.deepEqual(mine.calls.update, [{sort: 6}]);
+  });
+
+  test("turning it off leaves the canvas untouched", async () => {
+    const cover = makeToken({id: "cover", name: "Dragon", x: 0, y: 0, width: 200, height: 200,
+      sort: 5, isOwner: false});
+    const mine = makeToken({id: "mine", name: "Rogue", x: 50, y: 50, sort: 0});
+    env = installFoundry({tokens: [cover, mine], settings: {raiseOnSelect: false}});
+    await load();
+    invalidateConfig();
+
+    const bar = new RescueBar();
+    bar.show(cover);
+    env.hud.querySelector('button[data-token-id="mine"]')
+      .dispatchEvent(new env.window.MouseEvent("click", {bubbles: true}));
+    await settle();
+
+    assert.deepEqual(mine.calls.control, [{releaseOthers: true}], "it still selects");
+    assert.deepEqual(mine.calls.update, [], "but writes nothing");
   });
 
   test("right click raises too, since it also selects", async () => {

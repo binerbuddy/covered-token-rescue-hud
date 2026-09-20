@@ -72,8 +72,8 @@ describe("module registration", () => {
   test("registers all eight settings with defaults", () => {
     assert.equal(registered.size, 8);
     assert.ok(registered.has("raiseOnSelect"), "the raise setting must be registered");
-    assert.equal(registered.get("raiseOnSelect").default, false,
-      "raising rewrites a shared document, so it must be opt in");
+    assert.equal(registered.get("raiseOnSelect").default, true,
+      "selecting a token you cannot then reach is the surprising behaviour");
     for ( const [key, data] of registered ) {
       assert.equal(data.scope, "client", `${key} should be client scoped`);
       assert.notEqual(data.default, undefined, `${key} needs a default`);

@@ -44,9 +44,11 @@ The bar stays put while your pointer moves onto it, and follows the token if it 
 
 ### Selecting a token is not the same as reaching it
 
-Clicking a portrait selects the token, but it does not move it up the pile. Foundry hands every click on that square to whichever token is drawn on top, so a selected token underneath one of the others still cannot be dragged. You can still move it with the arrow keys, and right clicking its portrait opens its HUD.
+Selecting a token does not move it up the pile. Foundry hands every click on that square to whichever token is drawn on top, so on its own a rescued token would still be unreachable: selected, but impossible to drag or click.
 
-Turn on **Bring the token to the front when selected** to fix the underlying problem. It raises the token by writing its `sort` value, which is a change to the token itself: everyone at the table sees the new order, and it stays that way until something changes it back. That is why it is off by default.
+**Bring the token to the front when selected**, on by default, fixes that. Clicking a portrait also raises the token by writing its `sort` value, which puts it genuinely in front. Turn it off if you would rather the bar never touched the canvas; the token is still selected, and you can move it with the arrow keys or open its HUD by right clicking its portrait.
+
+Because `sort` lives on the token, the new order is shared: everyone at the table sees it, and it stays that way until something changes it back.
 
 Two limits are worth knowing. It only works on tokens you own, because Foundry does not let a player edit a token belonging to someone else. And a token buried by something at a higher elevation cannot be raised by reordering at all, since elevation wins; the module says so rather than quietly doing nothing.
 
@@ -62,7 +64,7 @@ All settings are per client, so each player can tune the bar to their own screen
 | Scale with canvas zoom | Off | On restores the old behaviour where the bar shrinks as you zoom out. Off keeps it a constant readable size |
 | Include tokens you do not own | On | Off shows only tokens you can control |
 | Outline token on hover | On | Draws a dashed outline on the canvas over the token a portrait refers to |
-| Bring the token to the front when selected | Off | Clicking a portrait also raises that token above the ones burying it, so you can drag and click it on the canvas. See the note below before turning this on |
+| Bring the token to the front when selected | On | Clicking a portrait also raises that token above the ones burying it, so you can drag and click it on the canvas. Turn it off to leave the canvas alone and only select the token |
 | Bar placement | Automatic | Draw the bar below the token, above it, or flip automatically near the bottom edge of the scene |
 
 ## What changed in version 2

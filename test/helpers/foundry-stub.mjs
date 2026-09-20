@@ -94,7 +94,7 @@ export function installFoundry({tokens, settings = {}, zoom = 1, hexagonal = fal
     scaleWithZoom: false,
     showUnowned: true,
     highlightOnHover: true,
-    raiseOnSelect: false,
+    raiseOnSelect: true,
     placement: "auto",
     ...settings
   };

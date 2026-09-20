@@ -14,7 +14,7 @@
   "CTRH.Settings.Highlight.Name": "Outline token on hover",
   "CTRH.Settings.Highlight.Hint": "Draw a dashed outline on the canvas over the token a portrait refers to.",
   "CTRH.Settings.RaiseOnSelect.Name": "Bring the token to the front when selected",
-  "CTRH.Settings.RaiseOnSelect.Hint": "Clicking a portrait also raises that token above the ones burying it, so you can drag and click it on the canvas. This changes the token for everyone at the table, and only works on tokens you own.",
+  "CTRH.Settings.RaiseOnSelect.Hint": "Clicking a portrait also raises that token above the ones burying it, so you can drag and click it on the canvas. This changes the token's draw order for everyone at the table, and only works on tokens you own. Turn it off to leave the canvas untouched and only select the token.",
   "CTRH.Settings.Placement.Name": "Bar placement",
   "CTRH.Settings.Placement.Hint": "Where the bar is drawn relative to the hovered token.",
   "CTRH.Settings.Placement.Auto": "Automatic",

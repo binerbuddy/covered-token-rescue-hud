@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.0
+
+### Changed
+
+- **Bring the token to the front when selected** now defaults to on. Clicking a portrait and finding the token still pinned under the pile is the surprising behaviour, not the raising, and an off-by-default setting is least likely to be found by the players who most need it. Turn it off for the previous behaviour, where the bar never writes to the canvas.
+
+  The setting stays client scoped, so each player chooses for themselves, and anyone who has already turned it off keeps it off.
+
 ## 2.1.1
 
 ### Fixed
